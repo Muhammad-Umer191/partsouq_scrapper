@@ -1,0 +1,46 @@
+# Python
+__pycache__/
+*.py[cod]
+
+# Virtual Environments
+.venv/
+venv/
+env/
+
+# IDEs
+.vscode/
+.idea/
+
+# OS Files
+.DS_Store
+Thumbs.db
+
+# Environment Variables
+.env
+
+# Python Cache
+.pytest_cache/
+.mypy_cache/
+.cache/
+
+# SeleniumBase
+.uc_driver/
+.chromedriver/
+
+# Build Files
+build/
+dist/
+*.egg-info/
+
+# Excel Files
+*.xlsx
+*.xls
+
+# Temporary Files
+*.tmp
+*.bak
+*.swp
+
+# Final scraped dataset
+data/parts.csv
+downloaded_files/*.lock
