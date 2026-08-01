@@ -1,13 +1,10 @@
 import csv
 import re
 from pathlib import Path
-
 import pandas as pd
-
 from bs4 import BeautifulSoup
 from selenium.webdriver.support.ui import Select
 from urllib.parse import urljoin
-
 import config
 
 
@@ -311,42 +308,105 @@ def parts_table(
     model,
     year,
     destination,
-    specification=None,
-    specification_name=None,
-    category_code="",
-    category_name="",
+    source_url,
 ):
-    if specification is None:
-        specification = specification_name or ""
-
     soup = BeautifulSoup(html, "lxml")
-    table = soup.select_one("table")
 
-    if table is None:
+
+    car_name = None
+    chassis = None
+    description = None
+    options = None
+    production_period = None
+
+    vehicle_table = soup.find("table")
+
+    if vehicle_table:
+        body = vehicle_table.find("tbody") or vehicle_table
+        rows = body.find_all("tr")
+
+        if len(rows) >= 2:
+            cols = rows[1].find_all(["td", "th"])
+
+            values = [
+                td.get_text(" ", strip=True) or None
+                for td in cols
+            ]
+
+            while len(values) < 6:
+                values.append(None)
+
+            car_name = values[1]
+            description = values[2]
+            chassis = values[3]
+            options = values[4]
+            production_period = values[5]
+
+    category = None
+
+    heading = soup.find("h2")
+
+    if heading:
+        category = heading.get_text(" ", strip=True) or None
+
+    parts_table = None
+
+    for table in soup.find_all("table"):
+
+        headers = [
+            th.get_text(" ", strip=True)
+            for th in table.find_all("th")
+        ]
+
+        if headers[:6] == [
+            "Number",
+            "Name",
+            "Code",
+            "Note",
+            "Quantity",
+            "Range",
+        ]:
+            parts_table = table
+            break
+
+    if parts_table is None:
         return []
 
+    body = parts_table.find("tbody") or parts_table
+
     rows = []
-    body = table.find("tbody") or table
 
     for tr in body.find_all("tr"):
-        cols = [td.get_text(" ", strip=True) for td in tr.find_all("td")]
-        if len(cols) < 6:
+
+        cells = [
+            td.get_text(" ", strip=True) or None
+            for td in tr.find_all("td")
+        ]
+
+        if not cells:
             continue
+
+        while len(cells) < 6:
+            cells.append(None)
 
         rows.append(
             {
+                "car_name": car_name,
                 "model": model,
+                "chassis": chassis,
                 "year": year,
                 "destination": destination,
-                "specification_name": specification,
-                "category_code": category_code,
-                "category_name": category_name,
-                "number": cols[0],
-                "name": cols[1],
-                "code": cols[2],
-                "note": cols[3],
-                "quantity": cols[4],
-                "range": cols[5],
+                "description": description,
+                "options": options,
+                "production_period": production_period,
+                "category": category,
+                "oem_number": cells[0],
+                "part_name": cells[1],
+                "part_code": cells[2],
+                "part_note": cells[3],
+                "quantity": cells[4],
+                "part_range": cells[5],
+                "source_url": source_url,
             }
         )
 

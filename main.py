@@ -1,3 +1,5 @@
+from lxml import html
+
 import config
 
 from crawler import Browser
@@ -155,6 +157,7 @@ def phase_parts(browser):
     buffer = ex.PartsBuffer()
 
     for i, row in catalogs.iterrows():
+
         if row["status"] == config.STATUS_DONE:
             continue
 
@@ -162,8 +165,9 @@ def phase_parts(browser):
             continue
 
         print("=" * 80)
-        print(f"MODEL    : {row['model']}")
-        print(f"CATALOG  : {row['category_name']}")
+        print(f"MODEL       : {row['model']}")
+        print(f"YEAR        : {row['year']}")
+        print(f"DESTINATION : {row['destination']}")
 
         try:
             browser.open(row["url"])
@@ -174,29 +178,30 @@ def phase_parts(browser):
                 model=row["model"],
                 year=row["year"],
                 destination=row["destination"],
-                specification=row["specification_name"],
-                category_code=row["category_code"],
-                category_name=row["category_name"],
+                source_url=row["url"],
             )
 
             for part in parts:
                 buffer.add(part)
 
-            print(f"Parts : {len(parts)}")
+            buffer.flush()
+
+            print(f"Parts scraped : {len(parts)}")
+
             catalogs.at[i, "status"] = config.STATUS_DONE
+
         except Exception as exc:
             print(f"FAILED : {exc}")
             catalogs.at[i, "status"] = config.STATUS_FAILED
+            print(exc)
 
         ex.save_csv(config.CATALOGS_CSV, catalogs)
-
-    buffer.flush()
 
 
 def main():
     with Browser() as browser:
         # phase_specifications(browser)
-        phase_catalogs(browser)
+        # phase_catalogs(browser)
         phase_parts(browser)
 
 

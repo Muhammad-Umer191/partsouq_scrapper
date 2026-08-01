@@ -52,18 +52,22 @@ GROUP_COLUMNS = [
 CATALOGS_COLUMNS = GROUP_COLUMNS
 
 PART_COLUMNS = [
+    "car_name",
     "model",
+    "chassis",
     "year",
     "destination",
-    "specification_name",
-    "category_code",
-    "category_name",
-    "number",
-    "name",
-    "code",
-    "note",
+    "description",
+    "options",
+    "production_period",
+    "category",
+    "oem_number",
+    "part_name",
+    "part_code",
+    "part_note",
     "quantity",
-    "range",
+    "part_range",
+    "source_url",
 ]
 
 DESTINATIONS = {
