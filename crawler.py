@@ -99,7 +99,7 @@ class Browser:
 
         self.sb.uc_open_with_reconnect(
             url,
-            reconnect_time=3,
+            reconnect_time=15,
         )
 
         self.solve_cloudflare()
