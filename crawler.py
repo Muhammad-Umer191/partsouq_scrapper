@@ -10,6 +10,7 @@ class Browser:
 
     def __init__(self):
         self._sb = None
+        self.open_count = 0
         self.sb = None
 
     def __enter__(self):
@@ -32,6 +33,7 @@ class Browser:
 
     def restart(self):
         """Restart the underlying SeleniumBase SB driver in-place."""
+        self.open_count = 0
         try:
             # Attempt a clean quit first
             if self._sb is not None:
@@ -97,10 +99,18 @@ class Browser:
 
         self.random_delay()
 
+        if self.open_count < 2:
+            reconnect_time = 15
+        else:
+            reconnect_time = 2
+
         self.sb.uc_open_with_reconnect(
             url,
-            reconnect_time=3,
+            reconnect_time=reconnect_time,
         )
+
+        self.open_count += 1
+
 
         title = self.sb.get_title()
 
