@@ -99,10 +99,18 @@ class Browser:
 
         self.sb.uc_open_with_reconnect(
             url,
-            reconnect_time=15,
+            reconnect_time=3,
         )
 
-        self.solve_cloudflare()
+        title = self.sb.get_title()
+
+        if (
+            "Just a moment" in title
+            or "Attention Required" in title
+        ):
+            print("Cloudflare detected. Solving...")
+            self.solve_cloudflare()
+
         self.sb.wait_for_ready_state_complete()
 
     def refresh(self):
@@ -110,7 +118,15 @@ class Browser:
             return
 
         self.sb.refresh()
-        self.solve_cloudflare()
+        title = self.sb.get_title()
+
+        if (
+            "Just a moment" in title
+            or "Attention Required" in title
+        ):
+            print("Cloudflare detected. Solving...")
+            self.solve_cloudflare()
+
         self.sb.wait_for_ready_state_complete()
 
     def html(self):

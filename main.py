@@ -181,8 +181,12 @@ def phase_parts(browser):
                 source_url=row["url"],
             )
 
-            for part in parts:
-                buffer.add(part)
+            if len(parts) == 0:
+                print("No parts found. Marking as PENDING for retry.")
+                catalogs.at[i, "status"] = config.STATUS_PENDING
+            else:
+                for part in parts:
+                    buffer.add(part)
 
             buffer.flush()
 
