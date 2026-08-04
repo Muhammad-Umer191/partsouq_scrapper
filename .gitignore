@@ -43,6 +43,4 @@ dist/
 
 # Final scraped dataset
 data/parts.csv
-data/specifications.csv
-data/catalogs.csv
 downloaded_files/*.lock

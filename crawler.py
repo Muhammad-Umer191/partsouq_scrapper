@@ -99,10 +99,10 @@ class Browser:
 
         self.random_delay()
 
-        if self.open_count < 2:
-            reconnect_time = 15
+        if self.open_count < 1:
+            reconnect_time = 25
         else:
-            reconnect_time = 2
+            reconnect_time = 0.1
 
         self.sb.uc_open_with_reconnect(
             url,
@@ -123,20 +123,36 @@ class Browser:
 
         self.sb.wait_for_ready_state_complete()
 
+    def wait_until_cloudflare_passes(self, timeout=300):
+        start = time.time()
+    
+        while time.time() - start < timeout:
+            html = self.sb.get_page_source()
+    
+            if (
+                "cf-browser-verification" not in html
+                and "challenge-platform" not in html
+                and "Just a moment..." not in html
+                and "Attention Required!" not in html
+            ):
+                print("Cloudflare passed.")
+                return True
+    
+            print("Waiting for Cloudflare...")
+            self.solve_cloudflare()
+            time.sleep(2)
+    
+        return False
+
     def refresh(self):
         if self.sb is None:
             return
-
+    
         self.sb.refresh()
-        title = self.sb.get_title()
-
-        if (
-            "Just a moment" in title
-            or "Attention Required" in title
-        ):
-            print("Cloudflare detected. Solving...")
-            self.solve_cloudflare()
-
+    
+        if not self.wait_until_cloudflare_passes():
+            raise TimeoutError("Cloudflare verification failed.")
+    
         self.sb.wait_for_ready_state_complete()
 
     def html(self):
